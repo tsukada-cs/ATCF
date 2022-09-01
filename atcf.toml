@@ -1,0 +1,1121 @@
+# """
+# ATCF best track, aids, bogus format 8/31/2016
+# See the notes on missing and deprecated data at the end of this document.
+# Common section, fields 1-36, followed by user-data section which is not predefined.
+
+# COMMON FIELDS
+# BASIN      - basin, e.g. WP, IO, SH, CP, EP, AL, LS
+# CY         - annual cyclone number: 1 - 99
+# YYYYMMDDHH - Warning Date-Time-Group, yyyymmddhh: 0000010100 through 9999123123.
+# TECHNUM/MIN- objective technique sorting number, minutes for best track: 00 - 99
+# TECH       - acronym for each objective technique or CARQ or WRNG,
+#             BEST for best track, up to 4 chars.
+# TAU        - forecast period: -24 through 240 hours, 0 for best-track, 
+#             negative taus used for CARQ and WRNG records.
+# LatN/S     - Latitude for the DTG: 0 - 900 tenths of degrees,
+#             N/S is the hemispheric index.
+# LonE/W     - Longitude for the DTG: 0 - 1800 tenths of degrees,
+#             E/W is the hemispheric index.
+# VMAX       - Maximum sustained wind speed in knots: 0 - 300 kts.
+# MSLP       - Minimum sea level pressure, 850 - 1050 mb.
+# TY         - Highest level of tc development:
+#             DB - disturbance, 
+#             TD - tropical depression, 
+#             TS - tropical storm, 
+#             TY - typhoon, 
+#             ST - super typhoon, 
+#             TC - tropical cyclone, 
+#             HU - hurricane, 
+#             SD - subtropical depression,
+#             SS - subtropical storm,
+#             EX - extratropical systems,
+#             PT - post tropical,
+#             IN - inland,
+#             DS - dissipating,
+#             LO - low,
+#             WV - tropical wave,
+#             ET - extrapolated,
+#             MD - monsoon depression,
+#             XX - unknown.
+# RAD        - Wind intensity for the radii defined in this record: 34, 50 or 64 kt.
+# WINDCODE   - Radius code: AAA (full circle), NEQ, SEQ, SWQ, NWQ (quadrant)
+# RAD1       - If full circle, radius of specified wind intensity, or radius of first quadrant wind intensity as specified by WINDCODE.  0 - 999 n mi
+# RAD2       - If full circle this field not used, or radius of 2nd quadrant wind intensity as specified by WINDCODE.  0 - 999 n mi.
+# RAD3       - If full circle this field not used, or radius of 3rd quadrant wind intensity as specified by WINDCODE.  0 - 999 n mi.
+# RAD4       - If full circle this field not used, or radius of 4th quadrant wind intensity as specified by WINDCODE.  0 - 999 n mi.
+# POUTER     - pressure in millibars of the last closed isobar, 900 - 1050 mb.
+# ROUTER     - radius of the last closed isobar, 0 - 999 n mi.
+# RMW        - radius of max winds, 0 - 999 n mi.
+# GUSTS      - gusts, 0 - 999 kt.
+# EYE        - eye diameter, 0 - 120 n mi.
+# SUBREGION  - subregion code: W,A,B,S,P,C,E,L,Q.
+#             A - Arabian Sea
+#             B - Bay of Bengal
+#             C - Central Pacific
+#             E - Eastern Pacific
+#             L - Atlantic
+#             P - South Pacific (135E - 120W)
+#             Q - South Atlantic
+#             S - South IO (20E - 135E)
+#             W - Western Pacific
+# MAXSEAS    - max seas: 0-999 ft.
+# INITIALS   - Forecaster's initials used for tau 0 WRNG or OFCL, up to 3 chars.
+# DIR        - storm direction, 0 - 359 degrees.
+# SPEED      - storm speed, 0-999 kts.
+# STORMNAME  - literal storm name, number, NONAME or INVEST, or TCcyx where:
+#             cy = Annual cyclone number 01 - 99
+#             x  = Subregion code: W,A,B,S,P,C,E,L,Q.
+# DEPTH      - system depth, 
+#         D - deep, 
+#         M - medium, 
+#         S - shallow, 
+#         X - unknown
+# SEAS       - Wave height for radii defined in SEAS1 - SEAS4, 0 - 99 ft.
+# SEASCODE   - Radius code:
+#             AAA - full circle
+#             NEQ, SEQ, SWQ, NWQ - quadrant 
+# SEAS1      - first quadrant seas radius as defined by SEASCODE,  0 - 999 n mi.
+# SEAS2      - second quadrant seas radius as defined by SEASCODE, 0 - 999 n mi.
+# SEAS3      - third quadrant seas radius as defined by SEASCODE,  0 - 999 n mi.
+# SEAS4      - fourth quadrant seas radius as defined by SEASCODE, 0 - 999 n mi.
+# USERDEFINE1- 1 to 20 character description of user data to follow.
+# userdata1  - user data section as indicated by USERDEFINED parameter (up to 100 char).
+# USERDEFINE2- 1 to 20 character description of user data to follow.
+# userdata2  - user data section as indicated by USERDEFINED parameter (up to 100 char).
+# USERDEFINE3- 1 to 20 character description of user data to follow.
+# userdata3  - user data section as indicated by USERDEFINED parameter (up to 100 char).
+# USERDEFINE4- 1 to 20 character description of user data to follow.
+# userdata4  - user data section as indicated by USERDEFINED parameter (up to 100 char).
+# USERDEFINE5- 1 to 20 character description of user data to follow.
+# userdata5  - user data section as indicated by USERDEFINED parameter (up to 100 char).
+# ------------------------------------------------------------------------------
+# userdata   - user data section as indicated by USERDEFINED parameter.
+# Examples of USERDEFINED/userdata pairs:
+# - An invest spawned from a genesis area:
+#     SPAWNINVEST, wp712015 to wp902015
+# - An invest area transitioning to a TC:
+#     TRANSITIONED, shE92015 to sh152015
+# - A TC dissipated to an invest area:
+#     DISSIPATED, sh162015 sh982015 
+# - A genesis area number:
+#     genesis-num, 001
+# ------------------------------------------------------------------------------
+
+# Notes:
+# 1) No missing data allowed for first eight common fields.  Missing data for other fields are expected to be blank characters between the comma delimiters.  Although the files are not column dependent please insure that the proper number of blank characters is included in missing data so the columns line up.  This makes the files easier to read and troubleshoot.
+# 2) The USERDEFINED section is for inclusion of items not already in the common fields.  The USERDEFINED parameter is 1 to 20 characters, so there should be sufficient space to include some text describing what comes next.
+# 3) Wind records merged in from preexisting wind files (r-decks) were assigned a TECH of CNTR.  Wind records created during normal use of this combined data format are assigned the TECH corresponding to the center name as defined in $ATCFINC/atcfsite.nam.
+# 4) WINDCODE and SEASCODE other than AAA, NEQ, SEQ, SWQ and NWQ exist in older data but have been deprecated.
+# 5) RAD values of 100 exist in old data (earlier than 2005) but have been deprecated.  Currently only 34, 50 and 64 are valid for RAD.
+# 6) The fields are not column dependent, but the files are easier to read and troubleshoot if the columns line up.  The fields are comma and space delimited.  
+# The desired field widths and preferred ATCF application ranges are as follows:
+#     field    number of chars	range
+#     -----    ---------------	-----
+#     BASIN        2			WP, EP, CP, IO, SH, AL, SL as defined in basin.dat
+#     CY           2 			01 to 99, 01 to 49 are real storms, 80 to 89 are test storms, 90 to 99 are INVESTS
+#     YYYYMMDDHH  10			only valid DTGs
+#     TECHNUM/MIN  2			00 <= TECHNUM <= 99,  00 <= MIN < 60
+#     TECH         4			up to four alphanumeric characters
+#     TAU          3 			-24 <= TAU <= 240 hours
+#     LatN/S       4 			0 <= Lat <= 900  N/S, in tenths of degrees
+#     LonE/W       5 			0 <= Lon <=1800  E/W, in tenths of degrees
+#     VMAX         3 			10 <= VMAX <= 250 kt
+#     MSLP         4 			850 to 1050 mb
+#     TY           2 			as defined in tcdevel.dat
+#     RAD          3 			34, 50, 64 kt
+#     WINDCODE     3 			AAA, NEW, SEQ, SWQ, NWQ
+#     RAD1         4 			MRD < RAD1 <= 999 n mi, 
+#                                         64 kt RAD1 < 50 kt RAD1 < 34 kt RAD1
+#                                         0 for no radius in quadrant, blank for unknown
+#         RAD2         4  	        See RAD1
+#     RAD3         4  		See RAD1
+#     RAD4         4  		See RAD1
+#     POUTER       4 			MSLP < RADP < 1050 mb
+#     ROUTER       4 			EYE <  RRP  <= 999 n mi
+#     RMW          3			0   <  MRD  <= RAD1, RAD2, RAD3, and RAD4
+#     GUSTS        3			VMAX < GUSTS < 300 kt
+#     EYE          3 			RRP < EYE < 120 n mi
+#     SUBREGION    3			W,E,C,A,B,S,P,L,Q   - basin.dat
+#     MAXSEAS      3			0 < MAXSEAS < 200 ft
+#     INITIALS     3
+#     DIR          3                  0 <= DIR < 360
+#     SPEED        3 			0 <= SPEED < 100 kt
+#     STORMNAME   10  
+#     DEPTH        1			D, M, S, X
+#     SEAS         2			0 < SEAS < 100 ft
+#     SEASCODE     3			AAA, NEW, SEQ, SWQ, NWQ
+#     SEAS1        4			0 < SEAS1 <= 999 n mi
+#     SEAS2        4 			See SEAS1
+#     SEAS3        4 			See SEAS1
+#     SEAS4        4 			See SEAS1
+#     USERDEFINED up to 20            1 to 20 characters of alphanumeric data 
+#     userdata    up to 200
+# """
+[a]
+common_cols = 48
+total_cols = 48
+format_specifier = ""
+subcolumn_devider = ""
+basin = {standard_name="basin", long_name="basin", units="", parser="str", description="Basin, e.g. WP, IO, SH, CP, EP, AL, LS"} 
+cy = {standard_name="cy", long_name="cyclone number", units="", parser="str", description="annual cyclone number"}
+t = {standard_name="t", long_name="t", units="", parser="date_parse_YmdH", description="Fix date-time-group"}
+technum = {standard_name="technum", long_name="Technum/min", units="", parser="str", description="Objective technique sorting number, minutes for best track: 00-99"}
+tech = {standard_name="tech", long_name="tech", units="", parser="str", description="acronym for each objective technique or CARQ or WRNG, BEST for best track"} 
+tau = {standard_name="tau", long_name="tau", units="", parser="float", description="forecast period: -24 through 240 hours, 0 for best-track, negative taus used for CARQ and WRNG records"} 
+lat = {standard_name="lat", long_name="Latitude for the DTG", units="degrees_north", parser="parse_01latNS", description="Latitude for the DTG"} 
+lon = {standard_name="lon", long_name="Longitude for the DTG", units="degrees_east", parser="parse_01lonEW", description="Longitude for the DTG"} 
+vmax = {standard_name="vmax", long_name="Maximum sustained wind speed", units="ms-1", parser="kt2ms", description="Maximum sustained wind speed"} 
+mslp = {standard_name="mslp", long_name="Minimum sea level pressure", units="hPa", parser="float", description="Minimum sea level pressure", valid_range="[850,1050]"} 
+ty = {standard_name="ty", long_name="Highest level of tc development", units="", parser="str", description="Highest level of tc development. DB: disturbance,  TD: tropical depression,  TS: tropical storm,  TY: typhoon,  ST: super typhoon,  TC: tropical cyclone,  HU: hurricane,  SD: subtropical depression, SS: subtropical storm, EX: extratropical systems, PT: post tropical, IN: inland, DS: dissipating, LO: low, WV: tropical wave, ET: extrapolated, MD: monsoon depression, XX: unknown"} 
+rad = {standard_name="rad", long_name="Rad", units="kt", parser="float", description="Wind intensity for the radii defined in this record: 34, 50 or 64 kt"} 
+windcode = {standard_name="windcode", long_name="Wind code", units="", parser="str", description="Radius code: AAA (full circle), NEQ, SEQ, SWQ, NWQ (quadrant)"} 
+r1 = {standard_name="r1", long_name="Rad 1", units="km", parser="nm2km", description="If full circle, radius of specified wind intensity, or radius of first quadrant wind intensity as specified by WINDCODE"} 
+r2 = {standard_name="r2", long_name="Rad 2", units="km", parser="nm2km", description="If full circle this field not used, or radius of 2nd quadrant wind intensity as specified by WINDCODE"} 
+r3 = {standard_name="r3", long_name="Rad 3", units="km", parser="nm2km", description="If full circle this field not used, or radius of 3rd quadrant wind intensity as specified by WINDCODE"} 
+r4 = {standard_name="r4", long_name="Rad 4", units="km", parser="nm2km", description="If full circle this field not used, or radius of 4th quadrant wind intensity as specified by WINDCODE"} 
+pout = {standard_name="pout", long_name="p outer", units="hPa", parser="float", description="Pressure of the last closed isobar", valid_range="[900,1050]"} 
+rout = {standard_name="rout", long_name="r outer", units="km", parser="nm2km", description="Radius of the last closed isobar"} 
+rmw = {standard_name="rmw", long_name="Radius of max winds", units="km", parser="nm2km", description="Radius of max winds"}
+gusts = {standard_name="gusts", long_name="gusts", units="ms-1", parser="kt2ms", description="Gusts"} 
+eye = {standard_name="eye", long_name="eye diameter", units="km", parser="nm2km", description="Eye diameter"} 
+subbasin = {standard_name="subbasin", long_name="subregion code", units="", parser="str", description="A: Arabian Sea, B: Bay of Bengal, C: Central Pacific, E: Eastern Pacific, L: Atlantic, P: South Pacific (135E - 120W), Q: South Atlantic, S: South IO (20E - 135E), W: Western Pacific"}
+maxseas = {standard_name="maxseas", long_name="Max Seas", units="km", parser="feet2km", description="Max Seas"} 
+initials = {standard_name="initials", long_name="Forecaster's initials", units="", parser="str", description="Forecaster's initials used for tau 0 WRNG or OFCL"} 
+storm_dir = {standard_name="storm_dir", long_name="storm direction", units="degrees", parser="float", description="storm tlanslation direction"}
+storm_speed = {standard_name="storm_speed", long_name="storm speed", units="ms-1", parser="kt2ms", description="storm tlanslation speed"} 
+name = {standard_name="name", long_name="storm name", units="", parser="str", description="literal storm name, number, NONAME or INVEST, or TCcyx where: cy = Annual cyclone number 01-99, x  = Subregion code: W,A,B,S,P,C,E,L,Q"} 
+depth = {standard_name="depth", long_name="system depth", units="", parser="str", description="system depth. D: deep, M: medium, S: shallow, X: unknown"}
+seas = {standard_name="seas", long_name="Wave height for radii defined in SEAS1 - SEAS4", units="m", parser="feet2m", description="Wave height for radii defined in SEAS1 - SEAS4"}
+seascode = {standard_name="seascode", long_name="seas radius code", units="", parser="str", description="AAA: full circle, NEQ, SEQ, SWQ, NWQ: quadrant"} 
+seas1 = {standard_name="seas1", long_name="seas1", units="km", parser="nm2km", description="first quadrant seas radius as defined by SEASCODE"} 
+seas2 = {standard_name="seas2", long_name="seas2", units="km", parser="nm2km", description="second quadrant seas radius as defined by SEASCODE"} 
+seas3 = {standard_name="seas3", long_name="seas3", units="km", parser="nm2km", description="third quadrant seas radius as defined by SEASCODE"} 
+seas4 = {standard_name="seas4", long_name="seas4", units="km", parser="nm2km", description="fourth quadrant seas radius as defined by SEASCODE"} 
+USERDEFINE1 = {standard_name="USERDEFINE1", long_name="USERDEFINE1", units="", parser="str", description="1 to 20 character description of user data to follow"} 
+userdata1 = {standard_name="userdata1", long_name="userdata1", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"} 
+USERDEFINE2 = {standard_name="USERDEFINE2", long_name="USERDEFINE2", units="", parser="str", description="1 to 20 character description of user data to follow"} 
+userdata2 = {standard_name="userdata2", long_name="userdata2", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"} 
+USERDEFINE3 = {standard_name="USERDEFINE3", long_name="USERDEFINE3", units="", parser="str", description="1 to 20 character description of user data to follow"} 
+userdata3 = {standard_name="userdata3", long_name="userdata3", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"} 
+USERDEFINE4 = {standard_name="USERDEFINE4", long_name="USERDEFINE4", units="", parser="str", description="1 to 20 character description of user data to follow"}
+userdata4 = {standard_name="userdata4", long_name="userdata4", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"}
+USERDEFINE5 = {standard_name="USERDEFINE5", long_name="USERDEFINE5", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"}
+userdata5 = {standard_name="userdata5", long_name="userdata5", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"}
+
+[b]
+common_cols = 48
+total_cols = 48
+format_specifier = ""
+subcolumn_devider = ""
+basin = {standard_name="basin", long_name="basin", units="", parser="str", description="Basin, e.g. WP, IO, SH, CP, EP, AL, LS"} 
+cy = {standard_name="cy", long_name="cyclone number", units="", parser="str", description="annual cyclone number"}
+t = {standard_name="t", long_name="t", units="", parser="date_parse_YmdH", description="Fix date-time-group"}
+technum = {standard_name="technum", long_name="Technum/min", units="", parser="str", description="Objective technique sorting number, minutes for best track: 00-99"}
+tech = {standard_name="tech", long_name="tech", units="", parser="str", description="acronym for each objective technique or CARQ or WRNG, BEST for best track"} 
+tau = {standard_name="tau", long_name="tau", units="", parser="float", description="forecast period: -24 through 240 hours, 0 for best-track, negative taus used for CARQ and WRNG records"} 
+lat = {standard_name="lat", long_name="Latitude for the DTG", units="degrees_north", parser="parse_01latNS", description="Latitude for the DTG"} 
+lon = {standard_name="lon", long_name="Longitude for the DTG", units="degrees_east", parser="parse_01lonEW", description="Longitude for the DTG"} 
+vmax = {standard_name="vmax", long_name="Maximum sustained wind speed", units="ms-1", parser="kt2ms", description="Maximum sustained wind speed"} 
+mslp = {standard_name="mslp", long_name="Minimum sea level pressure", units="hPa", parser="float", description="Minimum sea level pressure", valid_range="[850,1050]"} 
+ty = {standard_name="ty", long_name="Highest level of tc development", units="", parser="str", description="Highest level of tc development. DB: disturbance,  TD: tropical depression,  TS: tropical storm,  TY: typhoon,  ST: super typhoon,  TC: tropical cyclone,  HU: hurricane,  SD: subtropical depression, SS: subtropical storm, EX: extratropical systems, PT: post tropical, IN: inland, DS: dissipating, LO: low, WV: tropical wave, ET: extrapolated, MD: monsoon depression, XX: unknown"} 
+rad = {standard_name="rad", long_name="Rad", units="kt", parser="float", description="Wind intensity for the radii defined in this record: 34, 50 or 64 kt"} 
+windcode = {standard_name="windcode", long_name="Wind code", units="", parser="str", description="Radius code: AAA (full circle), NEQ, SEQ, SWQ, NWQ (quadrant)"} 
+r1 = {standard_name="r1", long_name="Rad 1", units="km", parser="nm2km", description="If full circle, radius of specified wind intensity, or radius of first quadrant wind intensity as specified by WINDCODE"} 
+r2 = {standard_name="r2", long_name="Rad 2", units="km", parser="nm2km", description="If full circle this field not used, or radius of 2nd quadrant wind intensity as specified by WINDCODE"} 
+r3 = {standard_name="r3", long_name="Rad 3", units="km", parser="nm2km", description="If full circle this field not used, or radius of 3rd quadrant wind intensity as specified by WINDCODE"} 
+r4 = {standard_name="r4", long_name="Rad 4", units="km", parser="nm2km", description="If full circle this field not used, or radius of 4th quadrant wind intensity as specified by WINDCODE"} 
+pout = {standard_name="pout", long_name="p outer", units="hPa", parser="float", description="Pressure of the last closed isobar", valid_range="[900,1050]"} 
+rout = {standard_name="rout", long_name="r outer", units="km", parser="nm2km", description="Radius of the last closed isobar"} 
+rmw = {standard_name="rmw", long_name="Radius of max winds", units="km", parser="nm2km", description="Radius of max winds"}
+gusts = {standard_name="gusts", long_name="gusts", units="ms-1", parser="kt2ms", description="Gusts"} 
+eye = {standard_name="eye", long_name="eye diameter", units="km", parser="nm2km", description="Eye diameter"} 
+subbasin = {standard_name="subbasin", long_name="subregion code", units="", parser="str", description="A: Arabian Sea, B: Bay of Bengal, C: Central Pacific, E: Eastern Pacific, L: Atlantic, P: South Pacific (135E - 120W), Q: South Atlantic, S: South IO (20E - 135E), W: Western Pacific"}
+maxseas = {standard_name="maxseas", long_name="Max Seas", units="km", parser="feet2km", description="Max Seas"} 
+initials = {standard_name="initials", long_name="Forecaster's initials", units="", parser="str", description="Forecaster's initials used for tau 0 WRNG or OFCL"} 
+storm_dir = {standard_name="storm_dir", long_name="storm direction", units="degrees", parser="float", description="storm tlanslation direction"}
+storm_speed = {standard_name="storm_speed", long_name="storm speed", units="ms-1", parser="kt2ms", description="storm tlanslation speed"} 
+name = {standard_name="name", long_name="storm name", units="", parser="str", description="literal storm name, number, NONAME or INVEST, or TCcyx where: cy = Annual cyclone number 01-99, x  = Subregion code: W,A,B,S,P,C,E,L,Q"} 
+depth = {standard_name="depth", long_name="system depth", units="", parser="str", description="system depth. D: deep, M: medium, S: shallow, X: unknown"}
+seas = {standard_name="seas", long_name="Wave height for radii defined in SEAS1 - SEAS4", units="m", parser="feet2m", description="Wave height for radii defined in SEAS1 - SEAS4"}
+seascode = {standard_name="seascode", long_name="seas radius code", units="", parser="str", description="AAA: full circle, NEQ, SEQ, SWQ, NWQ: quadrant"} 
+seas1 = {standard_name="seas1", long_name="seas1", units="km", parser="nm2km", description="first quadrant seas radius as defined by SEASCODE"} 
+seas2 = {standard_name="seas2", long_name="seas2", units="km", parser="nm2km", description="second quadrant seas radius as defined by SEASCODE"} 
+seas3 = {standard_name="seas3", long_name="seas3", units="km", parser="nm2km", description="third quadrant seas radius as defined by SEASCODE"} 
+seas4 = {standard_name="seas4", long_name="seas4", units="km", parser="nm2km", description="fourth quadrant seas radius as defined by SEASCODE"} 
+USERDEFINE1 = {standard_name="USERDEFINE1", long_name="USERDEFINE1", units="", parser="str", description="1 to 20 character description of user data to follow"} 
+userdata1 = {standard_name="userdata1", long_name="userdata1", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"} 
+USERDEFINE2 = {standard_name="USERDEFINE2", long_name="USERDEFINE2", units="", parser="str", description="1 to 20 character description of user data to follow"} 
+userdata2 = {standard_name="userdata2", long_name="userdata2", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"} 
+USERDEFINE3 = {standard_name="USERDEFINE3", long_name="USERDEFINE3", units="", parser="str", description="1 to 20 character description of user data to follow"} 
+userdata3 = {standard_name="userdata3", long_name="userdata3", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"} 
+USERDEFINE4 = {standard_name="USERDEFINE4", long_name="USERDEFINE4", units="", parser="str", description="1 to 20 character description of user data to follow"}
+userdata4 = {standard_name="userdata4", long_name="userdata4", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"}
+USERDEFINE5 = {standard_name="USERDEFINE5", long_name="USERDEFINE5", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"}
+userdata5 = {standard_name="userdata5", long_name="userdata5", units="", parser="str", description="user data section as indicated by USERDEFINED parameter"}
+
+
+# """
+# ATCF Probability Format         11/2020
+
+# COMMON FIELDS
+# -------------
+
+# Basin, CY, YYYYMMDDHH, ProbFormat, Tech, TAU, LatN/S, LonE/W, Prob, ...
+
+# Common section, fields 1 - 9,
+# followed by a specific format, examples follow:
+#     Track related data
+#     Intensity probability
+#     Rapid Intensification probabilities
+#     Rapid Decay probabilities
+#     Wind Radii estimated errors
+#     Pressure estimated error
+#     TC Genesis probability
+#     TC Genesis shape
+#         Eyeway Replacement forecast probabilities
+
+
+# Basin - basin, e.g. WP, IO, SH, CP, EP, AL, LS,  2 char.
+# CY - annual cyclone number: 1 through 99,  2 char.
+# YYYYMMDDHH - Warning Date-Time-Group: 0000010100 through 9999123123,  10 char.
+# ProbFormat - 2 char.
+#     TR - track, "03" also accepted for existing old edeck files
+#         IN - intensity
+#         RI - rapid intensification
+#         RW - rapid weakening
+#     WR - wind radii
+#     PR - pressure
+#     GN - TC genesis probability
+#     GS - TC genesis shape
+#         ER - eyewall replacement
+# Tech - acronym for each objective technique,  4 char.
+# TAU - forecast period: 0 through 168 hours,  3 char.
+# LatN/S - Latitude (tenths of degrees) for the DTG: 0 through 900, N/S is the hemispheric index,  4 char.
+# LonE/W - Longitude (tenths of degrees) for the DTG: 0 through 1800, E/W is the hemispheric index,  5 char.
+# Prob - probability of ProbItem (see parameter specific definition of ProbItem), 0 - 100%,  3 char.
+
+# -------------------
+
+# TRACK RELATED VALUES 
+
+# ProbItem - Probability radius, 0 through 2000 nm,  4 char.
+# TY - Level of tc development: currently unused,  2 char.
+# Dir - Cross track direction, 0 through 359 degrees,  3 char.
+# WindCode - Radius code: currently unused,  3 char.
+# rad_cross - Cross track radius, 0 through 2000 nm,  4 char.
+# rad_along - Along track radius, 0 through 2000 nm,  4 char.
+# bias_cross - Cross track bias, -999 through 999 nm,  4 char.
+# bias_along - Along track bias, -999 through 999 nm,  4 char.
+
+# ----
+
+# WIND RADII PROBABILITY
+
+# ProbItem - Wind speed (bias adjusted), 0 - 300 kts,  3 char.
+# TH - Wind Threshold (e.g., 34),  2 char.
+# Half_Range - Half the probability range (radius in n mi), 15 - 200 n mi,  4 char.
+
+# ----
+
+# INTENSITY PROBABILITY
+
+# ProbItem - Wind speed (bias adjusted), 0 - 300 kts,  3 char.
+# TY - Level of tc development: currently unused,  2 char.
+# Half_Range - Half the probability range (radius), 0 - 50 kts,  4 char.
+
+# ----
+
+# RAPID INTENSIFICATION PROBABILITY
+
+# ProbItem - intensity change, 0 - 300 kts,  3 char.
+# V - final intensity, 0 - 300 kts,  3 char.
+# Initials - forecaster initials,  3 char.
+# RIstartTAU - RI start time: 0 through 168 hours,  3 char.
+# RIstopTAU - RI stop time: 0 through 168 hours,  3 char.
+
+# ----
+
+# RAPID WEAKENING PROBABILITY
+
+# ProbItem - intensity change, 0 - 300 kts,  3 char.
+# V - final intensity, 0 - 300 kts,  3 char.
+# Initials - forecaster initials,  3 char.
+# RWstartTAU - RW start time: 0 through 168 hours,  3 char.
+# RWstopTAU - RW stop time: 0 through 168 hours,  3 char.
+
+# ----
+
+# TC GENESIS PROBABILITY
+
+# ProbItem - time period, ie genesis during next xxx hours, 0 for genesis or dissipate event, 0 - 240 hrs,  4 char.
+# Initials - forecaster initials,  3 char.
+# GenOrDis - "invest", "genFcst", "genesis", "disFcst" or "dissipate"
+# DTG - Genesis or dissipated event Date-Time-Group, yyyymmddhhmm: 0000010100 through 9999123123,  12 char.
+# stormID - cyclone ID if the genesis developed into an invest area or cyclone ID of dissipated TC, e.g. al032014
+# min - minutes, associated with DTG in common fields (3rd field in record), 0 - 59 min
+# genesisNum - genesis number, if spawned from a genesis area (1-999)
+# undefined - TBD
+
+# ----
+
+# TC GENESIS SHAPE
+
+# ProbItem - time period, ie genesis during next xxx hours, 0 - 240 hrs,  4 char.
+# Initials - forecaster initials,  3 char.
+# TCFAMANOPDTG - TCFA MANOP dtg, ddhhmm
+# TCFAMSGDTG - TCFA message dtg, yymmddhhmm
+# TCFAWTNUM - TCFA WT number,  2 char.
+# ShapeType - shape type, ELP - ellipse, BOX - box, CIR - circle, PLY - polygon,  3 char.
+# EllipseAngle - cross track angle for ellipse (math coords), 3 char.
+# EllipseRCross - cross track radius, 0 - 2000 nm,  4 char.
+# EllipseRAlong - along track radius, 0 - 2000 nm,  4 char.
+# Box1LatN/S - Latitude for start point for TCFA box center line or center point for TCFA circle,  4 char.
+#         0 - 900 tenths of degrees
+#             N/S is the hemispheric index
+# Box1LonE/W - Longitude for start point for TCFA box center line or center point for TCFA circle,  5 char.
+#         0 - 1800 tenths of degrees
+#             E/W is the hemispheric index
+# Box2LatN/S - Latitude for end point for TCFA box center line, not used for TCFA circle,  4 char.
+#         0 - 900 tenths of degrees
+#             N/S is the hemispheric index
+# Box2LonE/W - Longitude for start point for TCFA box center line, not used for TCFA circle,  5 char.
+#         0 - 1800 tenths of degrees
+#             E/W is the hemispheric index
+# TCFARADIUS - distance from center line to box edge, or radius of circle (nm),  3 char.
+# PolygonPts - array of 20 lat, lon points defining a polygon
+
+# ----
+
+# EYEWALL REPLACEMENT PROBABILITY
+
+# ProbItem - intensity change, 0 - 300 kts,  3 char.
+# V - final intensity, 0 - 300 kts,  3 char.
+# Initials - forecaster initials,  3 char.
+# ERstartTAU - RW start time: 0 through 168 hours,  3 char.
+# ERstopTAU - RW stop time: 0 through 168 hours,  3 char.
+# """
+[e]
+common_cols = 9
+total_cols = 24
+format_specifier = "format"
+subcolumn_devider = "format"
+basin = {standard_name="basin", long_name="basin", units="", parser="str", description="WP, IO, SH, CP, EP, AL, LS"}
+cy = {standard_name="cy", long_name="cyclone number", units="", parser="str", description="annual cyclone number"}
+t = {standard_name="t", long_name="t", units="", parser="date_parse_YmdH", description="Warning Date-Time-Group"}
+format = {standard_name="format", long_name="format", units="", parser="str", description="TR: track, '03' also accepted for existing old edeck files, IN: intensity, RI: rapid intensification, RW: rapid weakening, WR: wind radii, PR: pressure, GN: TC genesis probability, GS: TC genesis shape, ER: eyewall replacement"}
+tech = {standard_name="tech", long_name="tech", units="", parser="str", description="acronym for each objective technique"}
+tau = {standard_name="tau", long_name="tau", units="hours", parser="float", description="forecast period", valid_range="[0,168]"}
+lat = {standard_name="lat", long_name="Lat for the DTG", units="degrees_north", parser="parse_01latNS", description="Latitude"}
+lon = {standard_name="lon", long_name="Lon for the DTG", units="degrees_east", parser="parse_01lonEW", description="Longitude"}
+prob = {standard_name="prob", long_name="prob", units="%", parser="float", description="probability of ProbItem (see parameter specific definition of `item`), 0 - 100%"}
+
+[e.TR]
+item = {standard_name="item", long_name="item", units="km", parser="nm2km", description="Probability radius"}
+ty = {standard_name="ty", long_name="ty", units="", parser="str", description="Level of tc development: currently unused"}
+dir = {standard_name="dir", long_name="dir", units="degrees", parser="float", description="Cross track direction"}
+windcode = {standard_name="windcode", long_name="Wind code", units="", parser="str", description="Radius code: currently unused"}
+rad_cross = {standard_name="rad_cross", long_name="Cross track radius", units="km", parser="nm2km", description="Cross track radius"}
+rad_along = {standard_name="rad_along", long_name="Along track radius", units="km", parser="nm2km", description="Along track radius"}
+bias_cross = {standard_name="bias_cross", long_name="Cross track bias", units="km", parser="nm2km", description="Cross track bias"}
+bias_along = {standard_name="bias_along", long_name="Along track bias", units="km", parser="nm2km", description="Along track bias"}
+[e.WR]
+item = {standard_name="item", long_name="item", units="ms-1", parser="kt2ms", description="Wind speed (bias adjusted)"}
+th = {standard_name="th", long_name="Wind Threshold", units="kt", parser="float", description="Wind Threshold"}
+halfrange = {standard_name="halfrange", long_name="Half the probability range", units="km", parser="nm2km", description="Half the probability range"}
+[e.IN]
+item = {standard_name="item", long_name="item", units="ms-1", parser="kt2ms", description="Wind speed (bias adjusted)"}
+ty = {standard_name="ty", long_name="Wind Threshold (e.g., 34)", units="kt", parser="float", description="Wind Threshold (e.g., 34)"}
+halfrange = {standard_name="halfrange", long_name="Half the probability range", units="km", parser="nm2km", description="Half the probability range"}
+[e.RI]
+item = {standard_name="item", long_name="item", units="ms-1", parser="kt2ms", description="Intensity change"}
+V = {standard_name="V", long_name="Final intensity", units="ms-1", parser="kt2ms", description="Final intensity"}
+initials = {standard_name="initials", long_name="Forecaster initials", units="", parser="str", description="Forecaster initials"}
+RIstartTAU = {standard_name="RIstartTAU", long_name="RI start time", units="hours", parser="float", description="RI start time", valid_range="[0,168]"}
+RIstopTAU = {standard_name="RIstopTAU", long_name="RI stop time", units="hours", parser="float", description="RI stop time", valid_range="[0,168]"}
+[e.RW]
+item = {standard_name="item", long_name="item", units="ms-1", parser="kt2ms", description="Intensity change"}
+V = {standard_name="V", long_name="Final intensity", units="ms-1", parser="kt2ms", description="Final intensity"}
+initials = {standard_name="initials", long_name="Forecaster initials", units="", parser="str", description="Forecaster initials"}
+RWstartTAU = {standard_name="RWstartTAU", long_name="RW start time", units="hours", parser="float", description="RW start time", valid_range="[0,168]"}
+RWstopTAU = {standard_name="RWstopTAU", long_name="RW stop time", units="hours", parser="float", description="RW stop time", valid_range="[0,168]"}
+[e.GN]
+item = {standard_name="item", long_name="item", units="hours", parser="float", description="Time period, ie genesis during next xxx hours, 0 for genesis or dissipate event"}
+initials = {standard_name="initials", long_name="Forecaster initials", units="", parser="str", description="Forecaster initials"}
+gen_or_dis = {standard_name="gen_or_dis", long_name="General or Dissipate", units="", parser="str", description="'invest', 'genFcst', 'genesis', 'disFcst' or 'dissipate'"}
+DTG = {standard_name="DTG", long_name="Genesis or dissipated event Date-Time-Group", units="", parser="date_parse_YmdHM", description="Genesis or dissipated event Date-Time-Group"}
+stormID = {standard_name="stormID", long_name="cyclone ID", units="", parser="str", description="cyclone ID if the genesis developed into an invest area or cyclone ID of dissipated TC, e.g. al032014"}
+minutes = {standard_name="minutes", long_name="minutes", units="minutes", parser="float", description="minutes, associated with DTG in common fields (3rd field in record)", valid_range="[0,59]"}
+genesisNum = {standard_name="genesisNum", long_name="genesis number", units="", parser="str", description="genesis number, if spawned from a genesis area", valid_range="[1,999]"}
+undefined = {standard_name="undefined", long_name="undefined", units="", parser="str", description="TBD"}
+[e.GS]
+item = {standard_name="item", long_name="item", units="hours", parser="float", description="time period, ie genesis during next xxx hours", valid_range="[0,240]"}
+initials = {standard_name="initials", long_name="Forecaster initials", units="", parser="str", description="Forecaster initials"}
+TCFAMANOPDTG = {standard_name="TCFAMANOPDTG", long_name="TCFAMANOPDTG", units="", parser="str", description="TCFA MANOP dtg, ddhhmm"}
+TCFAMSGDTG = {standard_name="TCFAMSGDTG", long_name="TCFAMSGDTG", units="", parser="date_parse_YmdHM", description="TCFA message dtg, yymmddhhmm"}
+TCFAWTNUM = {standard_name="TCFAWTNUM", long_name="TCFAWTNUM", units="", parser="str", description="TCFA WT number"}
+shape_type = {standard_name="shape_type", long_name="Shape Type", units="", parser="str", description="shape type. ELP: ellipse, BOX: box, CIR: circle, PLY: polygon"}
+ellipse_angle = {standard_name="ellipse_angle", long_name="cross track angle for ellipse", units="degrees", parser="float", description="cross track angle for ellipse"}
+ellipse_rcross = {standard_name="ellipse_rcross", long_name="cross track radius", units="km", parser="nm2km", description="cross track radius"}
+ellipse_ralong = {standard_name="ellipse_ralong", long_name="along track radius", units="km", parser="nm2km", description="along track radius"}
+box1_lat = {standard_name="box1_lat", long_name="box1_lat", units="degrees_north", parser="parse_01latNS", description="Latitude for start point for TCFA box center line or center point for TCFA circle"}
+box1_lon = {standard_name="box1_lon", long_name="box1_lon", units="degrees_east", parser="parse_01lonEW", description="Longitude for start point for TCFA box center line or center point for TCFA circle"}
+box2_lat = {standard_name="box2_lat", long_name="box2_lat", units="degrees_north", parser="parse_01latNS", description="Latitude for end point for TCFA box center line, not used for TCFA circle"}
+box2_lon = {standard_name="box2_lon", long_name="box2_lon", units="degrees_east", parser="parse_01lonEW", description="Longitude for start point for TCFA box center line, not used for TCFA circle"}
+TCFARADIUS = {standard_name="TCFARADIUS", long_name="TCFARADIUS", units="km", parser="nm2km", description="Distance from center line to box edge, or radius of circle"}
+polygon = {standard_name="polygon", long_name="polygon points", units="", parser="str", description="Array of 20 lat, lon points defining a polygon"}
+[e.ER]
+item = {standard_name="item", long_name="item", units="ms-1", parser="kt2ms", description="Intensity change"}
+V = {standard_name="V", long_name="Final intensity", units="ms-1", parser="kt2ms", description="Final intensity"}
+initials = {standard_name="initials", long_name="Forecaster initials", units="", parser="str", description="Forecaster initials"}
+ERstartTAU = {standard_name="ERstartTAU", long_name="ER start time", units="hours", parser="float", description="ER start time", valid_range="[0,168]"}
+ERstopTAU = {standard_name="ERstopTAU", long_name="ER stop time", units="hours", parser="float", description="ER stop time", valid_range="[0,168]"}
+[e.PR]
+TODO1 = {standard_name="TODO1", long_name="TODO1", units="", parser="str", description=""}
+TODO2 = {standard_name="TODO2", long_name="TODO2", units="", parser="str", description=""}
+
+# """
+# ATCF Fixes Format          6/10/2009
+
+# Common section, fields 1 - 32,
+# followed by one of the following:
+#         Subjective dvorak
+#         Objective dvorak
+#         Microwave
+#         Radar
+#         Aircraft
+#         Dropsonde
+#         Analysis
+
+
+# COMMON FIELDS
+# -------------
+
+# Basin -  WP, IO, SH, CP, EP, AL, LS                  2 char.
+# CY - annual cyclone number, 1-99,                    2 char.
+# YYYYMMDDHHMM = Fix date-time-group,                 12 char.
+# Fix format - 10 - subjective dvorak                  3 char.
+#             20 - objective dvorak
+#             30 - microwave
+#             31 - scatterometer
+#             40 - radar
+#             50 - aircraft
+#             60 - dropsonde
+#             70 - analysis
+# fix type - DVTS - subjective Dvorak                  4 char.
+#         DVTO - objective Dvorak
+#         SSMI - Special Sensor Microwave Imager
+#         SSMS - SSM/IS (Shared Processing Program)
+#         QSCT - QuikSCAT
+#         ERS2 - European Remote Sensing System scatterometer
+#         SEAW - SeaWinds  scatterometer
+#         TRMM - Tropical Rainfall Measuring Mission microwave and vis/ir imager 
+#         WIND - WindSat, polarimetric microwave radiometer
+#         MMHS - Micorwave Humidity Sounder
+#         ALTG - geosat altimeter
+#         AMSU - Advanced Microwave Sounding Unit
+#         RDRC - conventional radar
+#         RDRD - doppler radar
+#         RDRT - TRMM radar
+#         SYNP - synoptic
+#         AIRC - aircraft
+#         ANAL - analysis
+#         DRPS - dropsonde
+#         UNKN - unknown
+# Center/intensity -                                  10 char.
+#     C-center fix, lat/lon specifies a center fix position,
+#     I-intensity fix, V specifies the max wind speed assoc. with the storm,
+#     R-wind radii fix, 
+#     P-pressure, Pressure specifies central mean sea level pressure
+#     N-none,
+#     C, I, P, R, CI, CP, IP, CIP, N ...
+# Flagged indicator -                                  1 char.
+#     C-center location is flagged,
+#     I-intensity is flagged,
+#     R-wind radii is flagged,
+#     P-pressure is flagged,
+#     F-all of the above are flagged,
+#     " "-fix is not flagged.
+# Lat N/S - Latitude (hundreths of degrees), 0-9000    5 char.
+#         N/S is the hemispheric index.
+# Lon E/W - Longitude (hundreths of degrees), 0-18000  6 char.
+#         E/W is the hemispheric index.
+# Height of ob - 0-99999 meters                        5 char.
+# Posit Confidence - 1-good, 2-fair, 3-poor            1 char.
+# V - Wind speed (kts), 0 - 300 kts                    3 char.
+# V Confidence - 1-good, 2-fair, 3-poor                1 char.
+# Pressure - Pressure, 0 - 1050 mb.                    4 char.
+# Pressure Confidence - 1-good, 2-fair, 3-poor         1 char.
+# Pressure derivation -                                4 char.
+#     DVRK - dvorak, 
+#     AKHL - atkinson-holiday table,
+#     XTRP - extrapolated,
+#     MEAS - measured,
+# Rad - Wind intensity (kts) - 34, 50, 64              3 char.
+#     for the radii defined in this record.
+# Windcode - Radius code:                              4 char.
+#     AAA - full circle
+#     NEQ - northeast quadrant
+# Rad1 - If full circle, radius of specified wind intensity.  
+#     Otherwise radius of specified wind intensity for northeast 
+#     quadrant of circle.  0 - 1200 nm.             4 char.
+# Rad2 - Radius of specified wind intensity for 2nd quadrant
+#     (southeast quadrant).  0 - 1200 nm.           4 char.
+# Rad3 - Radius of specified wind intensity for 3rd quadrant
+#     (southwest quadrant).  0 - 1200 nm.           4 char.
+# Rad4 - Radius of specified wind intensity for 4th quadrant
+#     (northwest quadrant).  0 - 1200 nm.           4 char.
+# RadMod1 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+# RadMod2 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+# RadMod3 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+# RadMod4 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+# Radii confidence - 1-good, 2-fair, 3-poor            1 char.
+# MRD - radius of max winds 0-999 nm                   3 char.
+# Eye - eye diameter, 0-120 nm.                        3 char.
+# Subregion - subregion code: W,A,B,S,P,C,E,L,Q        1 char.
+#         A - Arabian Sea
+#         B - Bay of Bengal
+#         C - Central Pacific
+#         E - Eastern Pacific
+#         L - Atlantic
+#         P - South Pacific (135E - 120W)
+#         Q - South Atlantic
+#         S - South IO (20E - 135E)
+#         W - Western Pacific
+# Fix site/WMO Identifier -                            5 char.
+# Initials (fix enterer) -                             3 char.
+
+# --------------------------------------------------------------
+
+# SATELLITE
+
+
+# DVTS -- Subjective dvorak technique 
+#     Sensor type - vis, ir, microwave...            4 char.
+#                     V, I, M, VI, IM, VM, VIM
+#     PCN code (deprecated) -                        1 char.
+#         1 = Eye/Geography
+#         2 = Eye/Ephemeris
+#         3 = Well Defined Circ. Center/Geography
+#         4 = Well Definged Circ. Center/Ephemeris
+#         5 = Poorly Defined Circ. Center/Geography
+#         6 = Poorly Defined Circ. Center/Ephemeris
+#     Dvorak code - long term trend,                10 char.
+#         (18-30 hour change in t-number)
+#         T num, none or 0.0 - 8.0
+#         CI num, none or 0.0 - 8.0
+#         Forecast intensity change, + - or blank
+#         Past change - developed, steady, weakened (long term trend)
+#         Amount of t num change, none or 0.0 - 8.0
+#         Hours since previous eval,  18 - 30 HRS
+#         Example: T4.0/4.0+/D1.0/24HRS
+#         Entry: 4040+D1024
+#     Dvorak code - short term trend,                5 char.
+#         ( < 18 hour change in t-number.  Only used when
+#         significant difference from long term trend, i.e.,
+#         LTT is +1.0 strengthening, but STT over 6 hours
+#         shows - 0.5 weakening.)
+#         Past change - developed, steady, weakened (short term trend)
+#         Amount of t num change, none or 0.0 - 8.0
+#         Hours since previous eval,  0 - 17 HRS
+#         Example: W0.5/06HRS
+#         Entry: W0506
+#     CI 24 hr forecast - none or 0.0 - 8.0          2 char.
+#     Satellite type -                               6 char.
+#             GMS, DMSP, DMSP45, TRMM, NOAA...
+#     center type - CSC, LLCC, ULCC                  4 char.
+#         LLCC - lower level cloud center
+#         ULCC - upper level cloud center
+#         CSC - cloud system center
+#     Tropical indicator -                           1 char.
+#         S-subtropical, E-extratropical, T-tropical
+#     Comments -                                    52 char.
+
+# -----
+
+# DVTO -- Objective dvorak technique Data (IR)
+#     Sensor type - vis, ir, microwave...            4 char.
+#                     V, I, M, VI, IM, VM, VIM
+#     CI num -                                       2 char.
+#     CI confidence - 1-good, 2-fair, 3-poor,        1 char.
+#     T num (average)                                2 char.
+#     T num averaging time period - hours            3 char.
+#     T num averaging derivation -                   1 char.
+#             L-straight linear, T-time weighted
+#     T num (raw)                                    2 char.
+#     Temperature (eye), -99 - 50 celsius            4 char.
+#     Temperature (cloud surrounding eye) - celsius  4 char.
+#     Scene type -  CDO, EYE, EEYE, SHER...          4 char.
+#         CDO - central dense overcast
+#         EYE - definable eye
+#         EMBC - embedded center
+#         SHER - partially exposed eye due to strong wind shear 
+#                 with asymmetric convective structure
+#     Algorithm (Rule 9 flag, Rapid flag) - R9, RP   2 char.
+#     Satellite type -                               6 char.
+#             GMS, DMSP, DMSP45, TRMM, NOAA...
+#     Tropical indicator -                           1 char.
+#         S-subtropical, E-extratropical, T-tropical
+#     Comments -                                    52 char.
+
+# -----
+
+# SSMI, TRMM, AMSU, ADOS, ALTI, ERS2, QSCT, SEAW -- MICROWAVE
+#     Rain flagged - "R" or blank                    1 char.
+#     Rainrate -   0-500 mm/h                        3 char.
+#     Process -                                      6 char. 
+#             FNMOC algorithm, NESDIS algorithm, RSS...
+#     Wave height (active micr) - 0-99 ft            2 char.
+#     Temp (passive micr) - celsius                  4 char.
+#     SLP (raw, AMSU only) - mb                      4 char.
+#     SLP (retrieved, AMSU only) - mb                4 char.
+#     Max Seas - (alti) 0-999 ft.                    3 char.
+#     Satellite type -                               6 char.
+#             GMS, DMSP, DMSP45, TRMM, NOAA...
+#     Rad - Wind intensity (kts) - 34, 50, 64        3 char.
+#             for the radii defined in this record.
+#     Windcode - Radius code:                        4 char.
+#         AAA - full circle
+#         quadrant designations:
+#         NEQ - northeast quadrant
+#         octant designations:
+#         XXXO - octants (NNEO, ENEO, ESEO, SSEO, SSWO, WSWO, WNWO NNWO) 
+#     Rad1 - If full circle, radius of specified wind intensity.  Otherwise
+#         radius of specified wind intensity of wind intensity of circle 
+#         portion specified in windcode.  0 - 1200 nm.  4 char.
+#     Rad2 - Radius of specified wind intensity for 2nd quadrant/octant 
+#         (counting clockwise from quadrant specified in windcode).  
+#         0 - 1200 nm.                                  4 char.
+#     Rad3 - Radius of specified wind intensity for 3rd quadrant/octant 
+#         (counting clockwise from quadrant specified in windcode).  
+#         0 - 1200 nm.                                  4 char. 
+#     Rad4 - Radius of specified wind intensity for 4th quadrant/octant 
+#         (counting clockwise from quadrant specified in windcode).  
+#         0 - 1200 nm.                                  4 char.
+#     Rad5 - Radius of specified wind intensity for 5th octant 
+#         (counting clockwise from quadrant specified in windcode).  
+#         0 - 1200 nm.                                  4 char.
+#     Rad6 - Radius of specified wind intensity for 6th octant 
+#         (counting clockwise from quadrant specified in windcode).  
+#         0 - 1200 nm.                                  4 char.
+#     Rad7 - Radius of specified wind intensity for 7th octant 
+#         (counting clockwise from quadrant specified in windcode).  
+#         0 - 1200 nm.                                  4 char.
+#     Rad8 - Radius of specified wind intensity for 8th octant 
+#         (counting clockwise from quadrant specified in windcode).  
+#         0 - 1200 nm.                                  4 char.
+#     RadMod1 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+#     RadMod2 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+#     RadMod3 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+#     RadMod4 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+#     RadMod5 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+#     RadMod6 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+#     RadMod7 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+#     RadMod8 - E-Edge of Pass, C-Cut off by Land, B-Both  1 char.
+#     Radii confidence - 1-good, 2-fair, 3-poor        1 char.
+#     Comments -                                    52 char.
+
+# ----------------------------------------------------------------
+
+# RADAR
+
+# RDRC, RDRD, RDRT -- Radar, Conventional, Doppler and TRMM
+#     Radar Type:                                    1 char.
+#         L - Land; S - Ship; A - Aircraft; T - Satellite
+#     Radar Format:                                  1 char.
+#         R - RADOB; P - plain language; D - Doppler
+#     RADOB CODE - A S W a r t d d f f              10 char.
+#                 c c c c t e s s s s
+#         See description below.
+#         Also enter slashes if reported and in place of blanks.
+#     Eye Shape -                                    2 char.
+#         CI - Circular; EL - Elliptic; CO - concentric
+#     Percent of Eye Wall Observed (99 = 100%) -     2 char.
+#     Spiral Overlay (degrees) -                     2 char.
+#     Radar Site Position Lat N/S -                  5 char.
+#                         Lon E/W -                  6 char.
+#     Inbound Max Wind - 0-300 kts                   3 char.
+#         Azimuth - degrees, 1-360                    3 char.
+#         Range - less than 400 nm,                   3 char.
+#         Elevation - feet                            5 char.
+#     Outbound Max Wind - 0-300 kts                  3 char.
+#         Azimuth - degrees, 1-360                    3 char.
+#         Range - less than 400 nm,                   3 char.
+#         Elevation - feet                            5 char.
+#     Max Cloud Height (trmm radar) - 70,000ft       5 char.
+#     Rain accumulation:
+#         Max. rain accumulation, hundreths of inches 0-10000 5 char.
+#         Time interval, 1 - 120 hours                 3 char.
+#         Lat N/S - Latitude (hundreths of degrees), 0-9000   5 char.
+#             N/S is the hemispheric index.
+#         Lon E/W - Longitude (hundreths of degrees), 0-18000 6 char.
+#             E/W is the hemispheric index.
+#     Comments -                                    52 char.
+
+# Note:  The greater of the two inbound and outbound winds should
+#         be assigned to the V field.  It is not mandatory to have both 
+#         inbound and outbound winds.
+
+
+# RADAR OBSERVATION CODE description
+                                                                        
+#     10314    30222
+# AcScWcacrt tedsdsfsfs
+#     Char     Mvmnt
+                                                                        
+# Char.  AcScWcacrt.  Coded characteristics of the eye of the system  
+#     Ac--Accuracy of the position of the center or the eye
+#     Code
+#         1  Eye visible on radar scope, accuracy good (within 10km).  
+#         2  Eye visible on radar scope, accuracy fair (within 30 km).
+#         3  Eye visible on radar scope, accuracy poor (within 50 km).
+#         4  Position of the center within the area covered by the radar 
+#         scope, determination by means of the spiral-band overlay, 
+#         accuracy good (within 10km).
+#         5  Position of the center within the area covered by the radar 
+#         scope, determination by means of the spiral-band overlay, 
+#         accuracy fair (within 30km).
+#         6  Position of the center within the area covered by the radar 
+#         scope, determination by means of the spiral-band overlay, 
+#         accuracy poor (within 50km).
+#         7  Position of the center outside the area covered by the radar 
+#         scope, extrapolation by means of the spiral-band overlay.
+#         /  Accuracy undetermined.
+
+#     Sc--Shape and definition of the eye.
+#     Code
+#         0  Circular.
+#         1  Elliptical-the minor axis at least 3/4 the length of the
+#         major axis.
+#         2  Elliptical-the minor axis is less than 3/4 the length of
+#         the major axis.
+#         3  Apparent double eye.
+#         4  Other shape.
+#         5  Ill defined.
+#         /  Undetermined.
+
+#     Wc--Diameter or length of axis of the eye.
+#     Code
+#         0  Less than 5 km.
+#         1   5 to less than 10 km.
+#         2  10 to less than 15 km.
+#         3  15 to less than 20 km.
+#         4  20 to less than 25 km.
+#         5  25 to less than 30 km.
+#         6  30 to less than 35 km.
+#         7  35 to less than 40 km.
+#         8  40 to less than 50 km.
+#         9  50 km and greater.
+#         /  Undetermined.
+
+#     ac--Change in character of the eye during the past 30 minutes
+#         preceding the time of observation.
+#     Code
+#         0  Eye has first become visible during the past 30 minutes.
+#         1  No significant change in characteristics or size of the eye.
+#         2  Eye has become smaller with no other significant change in 
+#         characteristics.
+#         3  Eye has become larger with no other significant change in 
+#         characterisitcs.
+#         4  Eye has become less distinct, no significant change in size.
+#         5  Eye has become less distinct and decreased in size.
+#         6  Eye has become less distinct and increased in size.
+#         7  Eye has become more distinct, no significant change in size.
+#         8  Eye has become more distinct and decreased in size.
+#         9  Eye has become more distinct and increased in size.
+#         /  Change in character and size of eye cannot be determined.
+
+#     rt--Distance between the end of the outermost spiral band and the 
+#         center.
+#     Code
+#         0    0 to less than 100 km.
+#         1  100 to less than 200 km.
+#         2  200 to less than 300 km.
+#         3  300 to less than 400 km.
+#         4  400 to less than 500 km.
+#         5  500 to less than 600 km.
+#         6  600 to less than 800 km.
+#         7  800 km or more.
+#         /  Doubtful or undetermined.
+
+# Mvmnt.  tedsdsfsfs.  Movement of the system.
+#     te--Time interval for which the system has been evaluated.
+#     dsds--The direction in tens of degrees toward which the system is 
+#         moving.
+#     fsfs--The speed in knots at which the system is moving.
+
+# -----------------------------------------------------------------
+
+# AIRCRAFT
+
+#     AIRC -- Aircraft
+#     Flight Level
+#         Flight Level - 100's of feet                2 char.
+#         Flight Level - millibars                    3 char.
+#         Minimum height - meters                     4 char.
+#     Maximum Surface Wind (inbound leg)
+#         Intensity - kts                             3 char.
+#         Bearing - degrees                           3 char.
+#         Range - nm                                  3 char.
+#     Maximum Flight Level Wind (inbound leg)
+#         Direction - degrees                         3 char.
+#         Intensity - kts                             3 char.
+#         Bearing - degrees                           3 char.
+#         Range - nm                                  3 char.
+#     Minimum Sea Level Pressure - millibars         4 char.
+#     Temperature Outside Eye  -99 to 99 Celsius     3 char.
+#     Temperature Inside Eye   -99 to 99 Celsius     3 char.
+#     Dew Point Temperature    -99 to 99 Celsius     3 char.
+#     Sea Surface Temperature    0 to 40 Celsius     2 char.
+#     Eye Character or Wall Cld Thickness (pre-2015) 2 char.
+#         NA - < 50% eyewall
+#         CL - Closed Wall
+#         PD - Poorly Defined
+#         N  - open North
+#         NE - open Northeast
+#         E  - open East     
+#         SE - open Southeast
+#         S  - open South
+#         SW - open Southwest
+#         W  - open West
+#         NW - open Northwest
+#         SB - spiral band 
+#     Eye Shape/Orientation/Diameter
+#         Shape: CI-circ.; EL-elliptic; CO-concentric 2 char.
+#         Orientation - degrees                       3 char.
+#         Diameter (long axis if elliptical) - nm     2 char.
+#         Short Axis (blank if not elliptical) - nm   2 char.
+#     Accuracy
+#         Navigational - tenths of nm                 3 char.
+#         Meteorological - tenths of nm               3 char.
+#     Mission Number                                 2 char.
+#     Comments -                                    52 char.
+
+# -----------------------------------------------------------------
+
+# DROPSONDE
+
+# DRPS -- Dropsondes
+#     Sonde environment -                           10 char.
+#         EYEWALL, EYE, RAINBAND, MXWNDBND, SYNOPTIC
+#     Height of midpoint over lowest 150 m of drop,
+#         meters (75 - 999 m)                          3 char.
+#     Speed of mean wind, lowest 150 m of drop - kts 3 char.
+#     Speed of mean wind, 0-500 m layer - kts        3 char.
+#     Comments -                                    52 char.
+
+# -----------------------------------------------------------------
+
+# ANALYSIS
+
+# ANAL -- Analysis( HRD, personal, aircraft, model(GFD) )
+#     Analyst initials -                             3 char.
+#     Start time - YYYYMMDDHHMM                     12 char.
+#     End time -  YYYYMMDDHHMM                      12 char.
+#     Distance to Nearest Data, 0 - 300 nm           3 char.
+#     SST - celsius                                  4 char
+#     Observation sources -                         24 char.       
+#         b - buoy, 
+#         l - land station, 
+#         m - SSMI, 
+#         c - scat, 
+#         t - trmm, 
+#         i - ir, 
+#         v - vis, 
+#         p - ship, 
+#         d - dropsonde, 
+#         a - aircraft, 
+#         r - radar, 
+#         x - other
+#         1 char. identifier for each ob source, concatenate
+#         the selected 1 char. identifiers to list all of the
+#         sources.
+#     Comments -                                    52 char.
+
+# -----------------------------------------------------------------
+# """
+[f]
+common_cols = 32
+total_cols = 61
+format_specifier = "format"
+subcolumn_devider = "type"
+
+basin = {standard_name="basin", long_name="basin", units="", parser="str", description="WP, IO, SH, CP, EP, AL, LS"}
+cy = {standard_name="cy", long_name="cyclone number", units="", parser="str", description="annual cyclone number"}
+t = {standard_name="t", long_name="t", units="", parser="date_parse_YmdHM", description="Fix date-time-group"}
+format = {standard_name="format", long_name="fix format", units="", parser="str", description="10: subjective dvorak, 20: objective dvorak, 30: microwave, 31: scatterometer, 40: radar, 50: aircraft, 60: dropsonde, 70: analysis"}
+type = {standard_name="type", long_name="fix type", units="", parser="str_upper", description="DVTS: subjective dvorak, DVTO: objective dvorak, SSMI: Special Sensor Microwave Imager, SSMS:SSM/IS (Shared Processing Program), QSCT: QuickSCAT, ERS2: European Remote Sensing System scatterometer, SEAW: SeaWinds, scatterometer, TRMM: Tropical Rainfall Measuring Mission microwave and vis/ir imager , WIND: WindSat, polarimetric microwave radiometer, MMHS: Micorwave Humidity Sounder, ALTG: geosat altimeter, AMSU: Advanced Microwave Sounding Unit, RDRC: conventional radar, RDRD: doppler radar, RDRT: TRMM radar, SYNP: synoptic, AIRC: aircraft, ANAL: analysis, DRPS: dropsonde, UNKN: unknown"}
+center_intensity = {standard_name="target", long_name="target", units="", parser="str", description="C: center, I: intensity, R: wind radii, P: slp, N: none"}
+flag = {standard_name="flagged", long_name="flagged", units="", parser="str", description="Flagged indicator. C: center, I: intensity, R: wind radii, P: slp, F: all, '': none"}
+lat = {standard_name="lat", long_name="latitude", units="degrees north", parser="parse_001latNS", description="latitude"}
+lon = {standard_name="lon", long_name="longitude", units="degrees east", parser="parse_001lonEW", description="longitude"}
+z = {standard_name="z", long_name="Height of observation", units="m", parser="float", description="Height of observation"}
+positconf = {standard_name="positconf", long_name="Posit Confidence", units="", parser="float", description="1: good, 2: fair, 3: poor"}
+v = {standard_name="v", long_name="wind speed", units="ms-1", parser="kt2ms", description="Wind speed"}
+vConf = {standard_name="vConf", long_name="V Confidence", units="", parser="float", description="1: good, 2: fair, 3: poor"}
+p = {standard_name="p", long_name="pressure", units="hPa", parser="float", description="Pressure"}
+pconf = {standard_name="pconf", long_name="Pressure Confidence", units="", parser="str", description="1: good, 2: fair, 3: poor"}
+pderiv = {standard_name="pderiv", long_name="Pressure derivatio", units="", parser="str", description="DVRK: dvorak, AKHL: atkinson-holiday table, XTRP: extrapolated, MEAS: measured"}
+r = {standard_name="r", long_name="Rad", units="kt", parser="float", description="Wind intensity for the radii defined in this record"}
+windcode = {standard_name="windcode", long_name="Wind Code", units="", parser="str", description="Radius code. AAA: full circle, NEQ: northeast quadrant"}
+r1 = {standard_name="r1", long_name="Rad 1", units="km", parser="nm2km", description="If full circle, radius of specified wind intensity. Otherwise radius of specified wind intensity for northeast quadrant of circle."}
+r2 = {standard_name="r2", long_name="Rad 2", units="km", parser="nm2km", description="Radius of specified wind intensity for 2nd quadrant (southeast quadrant)."}
+r3 = {standard_name="r3", long_name="Rad 3", units="km", parser="nm2km", description="Radius of specified wind intensity for 3rd quadrant (southwest quadrant)."}
+r4 = {standard_name="r4", long_name="Rad 4", units="km", parser="nm2km", description="Radius of specified wind intensity for 4th quadrant (northwest quadrant)."}
+rmod1 = {standard_name="rmod1", long_name="Rad Mod 1", units="", parser="str", description="E: edge of pass, C: cut off by land, B: both"}
+rmod2 = {standard_name="rmod2", long_name="Rad Mod 2", units="", parser="str", description="E: edge of pass, C: cut off by land, B: both"}
+rmod3 = {standard_name="rmod3", long_name="Rad Mod 3", units="", parser="str", description="E: edge of pass, C: cut off by land, B: both"}
+rmod4 = {standard_name="rmod4", long_name="Rad Mod 4", units="", parser="str", description="E: edge of pass, C: cut off by land, B: both"}
+rconf = {standard_name="rconf", long_name="Radii confidence", units="", parser="float", description="1: good, 2: fair, 3: poor"}
+rmw = {standard_name="rmw", long_name="radius of maximum winds", units="km", parser="nm2km", description="Raidus of maximum winds"}
+eye = {standard_name="eye", long_name="eye diameter", units="km", parser="nm2km", description="Eye diameter"}
+subbasin = {standard_name="subbasin", long_name="subregion code", units="", parser="str", description="A: Arabian Sea, B: Bay of Bengal, C: Central Pacific, E: Eastern Pacific, L: Atlantic, P: South Pacific (135E-120W), Q: South Atlantic, S: South IO (20E-135E) W: Wastern Pacific"}
+fixsite = {standard_name="fixsite", long_name="Fix site / WMO Identifier", units="", parser="str", description="Fix site / WMO Identifier"}
+initials = {standard_name="initials", long_name="Initials", units="", parser="str", description="Initials (fix enterer)"}
+
+[f.10]
+sensor = {standard_name="sensor", long_name="Sensor type", units="", parser="str", description="vis, ir, microwave... V, I, M, VI, IM, VM, VIM"}
+pcn = {standard_name="pcn", long_name="PCN code", units="", parser="float", description="1: Eye/Geography, 2: Eye/Ephemeris, 3: Well Defined Circ. Center/Geography, 4: Well Definged Circ. Center/Ephemeris. 5: Poorly Defined Circ. Center/Geography. 6: Poorly Defined Circ. Center/Ephemeris."}
+dvorak_long = {standard_name="dvorak_long", long_name="Dvorak code (long term trend)", units="", parser="str", description="Dvorak code (18-30 hour change in t-number), T# - none or 0.0-8.0, CI# - none or 0.0-8.0, Forecast intensity change (+/-/blank), Past change - developed, steady, weakened. T# change - none or 0.0-8.0, Hours since previous eval - 18-30 HRS. Example: T4.0/4.0+/D1.0/24HRS -> 4040+D1024"}
+dvorak_short = {standard_name="dvorak_short", long_name="Dvorak code (short term trend)", units="", parser="str", description="(< 18 hour change in t-number.  Only used when significant difference from long term trend, i.e., LTT is +1.0 strengthening, but STT over 6 hours shows - 0.5 weakening.), Past change - developed, steady, weakened. T# change - none or 0.0-8.0, Hours since previous eval - 0-17 HRS. Example: W0.5/06HRS -> W0506"}
+CI = {standard_name="CI", long_name="CI", units="", parser="float", description="CI 24 hr forecast - none or 0.0 - 8.0"}
+satellite = {standard_name="satellite", long_name="Satellite type", units="", parser="str", description="GMS, DMSP, DMSP45, TRMM, NOAA..."}
+center = {standard_name="center", long_name="Center type", units="", parser="str", description="LLCC: lower level cloud center, ULCC: upper level cloud center, CSC: cloud system center"}
+tropical_indicator = {standard_name="tropical_indicator", long_name="Tropical indicator", units="", parser="str", description="S: subtropical, E: extratropical, T: tropical"}
+comments = {standard_name="comments", long_name="comments", units="", parser="str", description=""}
+[f.20]
+sensor = {standard_name="sensor", long_name="Sensor type", units="", parser="str", description="vis, ir, microwave... V, I, M, VI, IM, VM, VIM"}
+CI = {standard_name="CI", long_name="CI number", units="", parser="float", description="CI number"}
+CIconf = {standard_name="CIconf", long_name="CI confidnece", units="", parser="float", description="1: good, 2: fair, 3: poor"}
+Tave = {standard_name="Tave", long_name="T number (average)", units="", parser="float", description="T number (average)"}
+Tave_period = {standard_name="Tave_period", long_name="T number averaging time period", units="hours", parser="float", description="T number averaging time period"}
+Tave_derivation = {standard_name="Tave_derivation", long_name="T number averaging derivation", units="", parser="str", description="L: straight linear, T: time weighted"}
+Traw = {standard_name="Traw", long_name="T number (raw)", units="", parser="float", description="T number (raw)"}
+Teye = {standard_name="Teye", long_name="Temperature (eye)", units="degrees celsius", parser="float", description="Temperature (eye)", valid_range="[-99,50]"}
+Ttop = {standard_name="Ttop", long_name="Temperature (cloud surrounding eye)", units="degrees celsius", parser="float", description="Temperature (cloud surrounding eye)"}
+scene = {standard_name="scene", long_name="Scene type", units="", parser="str", description="Scene type. CDO: central dense overcast, EYE: definable eye, EMBC: embedded center, SHER: partially exposed eye due to strong wind shear with asymmetric convective structure"}
+algorithm = {standard_name="algorithm", long_name="Algorithm", units="", parser="str", description="R9: Rule 9 flag, RP: Rapid flag"}
+satellite = {standard_name="satellite", long_name="Satellite type", units="", parser="str", description="Satellite type. GMS, DMSP, DMSP45, TRMM, NOAA..."}
+tropical_indicator = {standard_name="tropical_indicator", long_name="Tropical indicator", units="", parser="str", description="S: subtropical, E: extratropical, T: tropical"}
+comments = {standard_name="comments", long_name="comments", units="", parser="str", description=""}
+[f.30]
+rainflag = {standard_name="rainflag", long_name="Rain flagged", units="", parser="str", description="R or blank"}
+rainrate = {standard_name="rainrate", long_name="Rainrate", units="mm/s", parser="float", description="Rain rate", valid_range="[0,500"}
+process = {standard_name="process", long_name="Process", units="", parser="str", description="FNMOC algorithm, NESDIS algorithm, RSS..."}
+wave = {standard_name="wave", long_name="Wave height", units="m", parser="feet2m", description="Wave height (active microwave)"}
+temp = {standard_name="temp", long_name="Temperature", units="degrees celsius", parser="float", description="Temperature (passive microwave)"}
+slp_raw = {standard_name="slp_raw", long_name="SLP (raw)", units="hPa", parser="float", description="Sea Level Pressure (raw)"}
+slp = {standard_name="slp", long_name="SLP (retrieved)", units="", parser="float", description="Sea Level Pressure (retrieved)"}
+max_seas = {standard_name="max_seas", long_name="Max Seas", units="m", parser="feet2m", description="Max Seas (altitude)"}
+satellite = {standard_name="satellite", long_name="Satellite type", units="", parser="str", description="GMS, DMSP, DMSP45, TRMM, NOAA..."}
+rad = {standard_name="rad", long_name="Rad", units="", parser="float", description="Wind intensity (kts) - 34, 50, 64 for the radii defined in this record."}
+windcode = {standard_name="windcode", long_name="Windcode", units="", parser="str", description="Radius code: AAA - full circle. quadrant designations: NEQ - northeast quadrant. octant designations: XXXO - octants (NNEO, ENEO, ESEO, SSEO, SSWO, WSWO, WNWO NNWO)"}
+r1 = {standard_name="r1", long_name="Rad 1", units="km", parser="nm2km", description="If full circle, radius of specified wind intensity. Otherwise radius of specified wind intensity of wind intensity of circle portion specified in windcode."}
+r2 = {standard_name="r2", long_name="Rad 2", units="km", parser="nm2km", description="Radius of specified wind intensity for 2nd quadrant/octant (counting clockwise from quadrant specified in windcode)."}
+r3 = {standard_name="r3", long_name="Rad 3", units="km", parser="nm2km", description="Radius of specified wind intensity for 3rd quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+r4 = {standard_name="r4", long_name="Rad 4", units="km", parser="nm2km", description="Radius of specified wind intensity for 4th quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+r5 = {standard_name="r5", long_name="Rad 5", units="km", parser="nm2km", description="Radius of specified wind intensity for 5th quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+r6 = {standard_name="r6", long_name="Rad 6", units="km", parser="nm2km", description="Radius of specified wind intensity for 6th quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+r7 = {standard_name="r7", long_name="Rad 7", units="km", parser="nm2km", description="Radius of specified wind intensity for 7th quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+r8 = {standard_name="r8", long_name="Rad 8", units="km", parser="nm2km", description="Radius of specified wind intensity for 8th quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+rmod1 = {standard_name="rmod1", long_name="Rad Mod 1", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod2 = {standard_name="rmod2", long_name="Rad Mod 2", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod3 = {standard_name="rmod3", long_name="Rad Mod 3", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod4 = {standard_name="rmod4", long_name="Rad Mod 4", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod5 = {standard_name="rmod5", long_name="Rad Mod 5", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod6 = {standard_name="rmod6", long_name="Rad Mod 6", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod7 = {standard_name="rmod7", long_name="Rad Mod 7", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod8 = {standard_name="rmod8", long_name="Rad Mod 8", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rconf = {standard_name="rconf", long_name="Radii confidence", units="", parser="float", description="1: good, 2: fair, 3: poor"}
+comments = {standard_name="comments", long_name="comments", units="", parser="str", description=""}
+[f.31]
+rainflag = {standard_name="rainflag", long_name="Rain flagged", units="", parser="str", description="R or blank"}
+rainrate = {standard_name="rainrate", long_name="Rainrate", units="mm/s", parser="float", description="Rain rate", valid_range="[0,500"}
+process = {standard_name="process", long_name="Process", units="", parser="str", description="FNMOC algorithm, NESDIS algorithm, RSS..."}
+wave = {standard_name="wave", long_name="Wave height", units="m", parser="feet2m", description="Wave height (active microwave)"}
+temp = {standard_name="temp", long_name="Temperature", units="degrees celsius", parser="float", description="Temperature (passive microwave)"}
+slp_raw = {standard_name="slp_raw", long_name="SLP (raw)", units="hPa", parser="float", description="Sea Level Pressure (raw)"}
+slp = {standard_name="slp", long_name="SLP (retrieved)", units="", parser="float", description="Sea Level Pressure (retrieved)"}
+max_seas = {standard_name="max_seas", long_name="Max Seas", units="m", parser="feet2m", description="Max Seas (altitude)"}
+satellite = {standard_name="satellite", long_name="Satellite type", units="", parser="str", description="GMS, DMSP, DMSP45, TRMM, NOAA..."}
+rad = {standard_name="rad", long_name="Rad", units="", parser="float", description="Wind intensity (kts) - 34, 50, 64 for the radii defined in this record."}
+windcode = {standard_name="windcode", long_name="Windcode", units="", parser="str", description="Radius code: AAA - full circle. quadrant designations: NEQ - northeast quadrant. octant designations: XXXO - octants (NNEO, ENEO, ESEO, SSEO, SSWO, WSWO, WNWO NNWO)"}
+r1 = {standard_name="r1", long_name="Rad 1", units="km", parser="nm2km", description="If full circle, radius of specified wind intensity. Otherwise radius of specified wind intensity of wind intensity of circle portion specified in windcode."}
+r2 = {standard_name="r2", long_name="Rad 2", units="km", parser="nm2km", description="Radius of specified wind intensity for 2nd quadrant/octant (counting clockwise from quadrant specified in windcode)."}
+r3 = {standard_name="r3", long_name="Rad 3", units="km", parser="nm2km", description="Radius of specified wind intensity for 3rd quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+r4 = {standard_name="r4", long_name="Rad 4", units="km", parser="nm2km", description="Radius of specified wind intensity for 4th quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+r5 = {standard_name="r5", long_name="Rad 5", units="km", parser="nm2km", description="Radius of specified wind intensity for 5th quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+r6 = {standard_name="r6", long_name="Rad 6", units="km", parser="nm2km", description="Radius of specified wind intensity for 6th quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+r7 = {standard_name="r7", long_name="Rad 7", units="km", parser="nm2km", description="Radius of specified wind intensity for 7th quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+r8 = {standard_name="r8", long_name="Rad 8", units="km", parser="nm2km", description="Radius of specified wind intensity for 8th quadrant/octant (counting clockwise from quadrant specified in windcode)"}
+rmod1 = {standard_name="rmod1", long_name="Rad Mod 1", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod2 = {standard_name="rmod2", long_name="Rad Mod 2", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod3 = {standard_name="rmod3", long_name="Rad Mod 3", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod4 = {standard_name="rmod4", long_name="Rad Mod 4", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod5 = {standard_name="rmod5", long_name="Rad Mod 5", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod6 = {standard_name="rmod6", long_name="Rad Mod 6", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod7 = {standard_name="rmod7", long_name="Rad Mod 7", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rmod8 = {standard_name="rmod8", long_name="Rad Mod 8", units="", parser="str", description="E: Edge of Pass, C: Cut off by Land, B: Both"}
+rconf = {standard_name="rconf", long_name="Radii confidence", units="", parser="float", description="1: good, 2: fair, 3: poor"}
+comments = {standard_name="comments", long_name="comments", units="", parser="str", description=""}
+[f.40]
+radar = {standard_name="radar", long_name="Radar type", units="", parser="str", description="L: land, S: ship, A: aircraft, T: satellite"}
+radar_format = {standard_name="radar_format", long_name="Radar format", units="", parser="str", description="R: RADOB, P: plain language, D: Doppler"}
+code = {standard_name="code", long_name="RADOB code", units="", parser="str", description="Radar OBSERVATION code. See https://www.nrlmry.navy.mil/atcf_web/docs/database/new/newfdeck.txt"}
+eyeshape = {standard_name="eyeshape", long_name="Eye shape", units="", parser="str", description="CI: circular, EL: elliptic, CO: concentric"}
+eyewall_rate = {standard_name="eyewall_rate", long_name="Percent of eyewall observed", units="", parser="float", description="Percent of eyewall observed. 99=100%"}
+spiral_overlay = {standard_name="spiral_overlay", long_name="Spiral Overlay", units="degrees", parser="float", description="Spiral Overlay"}
+radar_lat = {standard_name="radar_lat", long_name="Radar site latitude", units="degrees_north", parser="parse_001latNS", description="Radar Site Position Latitude"}
+radar_lon = {standard_name="radar_lon", long_name="Radar site longitude", units="degrees_east", parser="parse_001lonEW", description="Radar Site Position Longitude"}
+inbound_vmax = {standard_name="inbound_vmax", long_name="Inbound Max Wind", units="ms-1", parser="kt2ms", description="Inbound Max Wind"}
+inbound_azimuth = {standard_name="inbound_azimuth", long_name="Inbound Azimuth", units="degrees", parser="float", description="Inbound Azimuth"}
+inbound_range = {standard_name="inbound_range", long_name="Inbound Range", units="km", parser="nm2km", description="Inbound Range"}
+inbound_elevation = {standard_name="inbound_elevation", long_name="Inbound Elevation", units="feet2km", parser="str", description="Inbound Elevation"}
+outbound_vmax = {standard_name="outbound_vmax", long_name="Outbound Max Wind", units="ms-1", parser="kt2ms", description="Outbound Max Wind"}
+outbound_azimuth = {standard_name="outbound_azimuth", long_name="Outbound Azimuth", units="degrees", parser="float", description="Outbound Azimuth"}
+outbound_range = {standard_name="outbound_range", long_name="Outbound Range", units="km", parser="nm2km", description="Outbound Range"}
+outbound_elevation = {standard_name="outbound_elevation", long_name="Outbound Elevation", units="feet2km", parser="str", description="Outbound Elevation"}
+max_cloud_height = {standard_name="max_cloud_height", long_name="Max Cloud Height", units="km", parser="feet2km", description="Max Cloud Height (TRMM radar)"}
+max_rain_accumulation = {standard_name="max_rain_accumulation", long_name="Max rain accumulation", units="mm", parser="inch001_to_mm", description="Max rain accumulation"}
+time_interval = {standard_name="time_interval", long_name="Rain accumulation time interval", units="hours", parser="float", description="Rain accumulation Time interval", valid_range="[1,120]"}
+rain_lat = {standard_name="rain_lat", long_name="Rain accumulation latitude", units="degrees_north", parser="parse_001latNS", description="Rain accumulation latitude"}
+rain_lon = {standard_name="rain_lon", long_name="Rain accumulation longitude", units="degrees_east", parser="parse_001lonEW", description="Rain accumulation longitude"}
+comments = {standard_name="comments", long_name="comments", units="", parser="str", description=""}
+[f.50]
+level_feet = {standard_name="level_feet", long_name="level_feet", units="km", parser="feet100_to_km", description="Flight Level (height)"}
+level_p = {standard_name="level_p", long_name="level_p", units="hPa", parser="float", description="Flight Level (pressure)"}
+level_min = {standard_name="level_min", long_name="level_min", units="km", parser="m2km", description="Flight Level (minimum height)"}
+surface_vmax = {standard_name="surface_vmax", long_name="surface_vmax", units="ms-1", parser="kt2ms", description="Maximum Surface Wind (inbound leg) intensity"}
+surface_bearing = {standard_name="surface_bearing", long_name="surface_bearing", units="", parser="str", description=""}
+surface_range = {standard_name="surface_range", long_name="surface_range", units="", parser="str", description=""}
+flightlevel_dir = {standard_name="flightlevel_dir", long_name="flightlevel_dir", units="", parser="str", description=""}
+flightlevel_vmax = {standard_name="flightlevel_vmax", long_name="flightlevel_vmax", units="ms-1", parser="kt2ms", description=""}
+flightlevel_bearing = {standard_name="flightlevel_bearing", long_name="flightlevel_bearing", units="", parser="str", description=""}
+flightlevel_range = {standard_name="flightlevel_range", long_name="flightlevel_range", units="", parser="str", description=""}
+mslp = {standard_name="mslp", long_name="mslp", units="", parser="str", description=""}
+temp_outside_eye = {standard_name="temp_outside_eye", long_name="temp_outside_eye", units="", parser="str", description=""}
+temp_inside_eye = {standard_name="temp_inside_eye", long_name="temp_inside_eye", units="", parser="str", description=""}
+dewpoint = {standard_name="dewpoint", long_name="dewpoint", units="", parser="str", description=""}
+sst = {standard_name="sst", long_name="sst", units="", parser="str", description=""}
+eye_or_WallCldThickness = {standard_name="eye_or_WallCldThickness", long_name="eye_or_WallCldThickness", units="", parser="str", description=""}
+eye_shape = {standard_name="eye_shape", long_name="eye_shape", units="", parser="str", description=""}
+eye_orientation = {standard_name="eye_orientation", long_name="eye_orientation", units="", parser="str", description=""}
+eye_diameter = {standard_name="eye_diameter", long_name="eye_diameter", units="", parser="str", description=""}
+eye_shortaxis = {standard_name="eye_shortaxis", long_name="eye_shortaxis", units="", parser="str", description=""}
+acc_nav = {standard_name="acc_nav", long_name="acc_nav", units="", parser="str", description=""}
+acc_met = {standard_name="acc_met", long_name="acc_met", units="", parser="str", description=""}
+mission = {standard_name="mission", long_name="mission", units="", parser="str", description=""}
+comments = {standard_name="comments", long_name="comments", units="", parser="str", description=""}
+[f.60]
+sondeenv = {standard_name="sondeenv", long_name="Sonde environment", units="", parser="str", description="EYEWALL, EYE, RAINBAND, MXWNDBND, SYNOPTIC"}
+lower_midp_height = {standard_name="l150_mid_height", long_name="Height of midpoint over lowest 150 m of drop", units="m", parser="float", description="Height of midpoint over lowest 150 m of drop", valid_range="[75,999]"}
+l150_v = {standard_name="l150_v", long_name="Speed of mean wind, lowest 150 m of drop", units="ms-1", parser="kt2ms", description="Speed of mean wind, lowest 150 m of drop"}
+l500_v = {standard_name="l500_v", long_name="Speed of mean wind, 0-500 m layer", units="ms-1", parser="kt2ms", description="Speed of mean wind, 0-500 m layer"}
+comments = {standard_name="comments", long_name="comments", units="", parser="str", description=""}
+[f.70]
+analyst = {standard_name="analyst", long_name="Analyst initials", units="", parser="str", description="Analyst initials"}
+start_time = {standard_name="start_time", long_name="Start time", parser="date_parse_YmdHM", description="Start time"}
+end_time = {standard_name="end_time", long_name="End time", parser="date_parse_YmdHM", description="End time"}
+nearest_dist = {standard_name="nearest_dist", long_name="Distance to Nearest Data", units="km", parser="nm2km", description="Distance to Nearest Data"}
+sst = {standard_name="sst", long_name="Sea Surface Temperature", units="degrees celsius", parser="float", description="Sea Surface Temperature"}
+sources = {standard_name="sources", long_name="Observation sources", units="", parser="str", description="1 char. identifier for each ob source, concatenatethe selected 1 char. identifiers to list all of thesources. b: buoy, l: land station, m: SSMI, c: scat, t: trmm, i: ir, v: vis, p: ship, d: dropsonde, a: aircraft, r: radar, x: other"}
+comments = {standard_name="comments", long_name="comments", units="", parser="str", description=""}
